@@ -53,6 +53,8 @@ jobs:
         with:
           path: ${{ needs.cache_dependencies_job.outputs.yarn_cache_dir }}
           key: ${{ needs.cache_dependencies_job.outputs.cache_key }}
+      - name: Install dependencies
+        run: yarn install
       - name: Lint code
         run: yarn lint
 
@@ -76,6 +78,8 @@ jobs:
         with:
           path: ${{ needs.cache_dependencies_job.outputs.yarn_cache_dir }}
           key: ${{ needs.cache_dependencies_job.outputs.cache_key }}
+      - name: Install dependencies
+        run: yarn install
       - name: Build code
         run: yarn build
 
@@ -99,5 +103,7 @@ jobs:
         with:
           path: ${{ needs.cache_dependencies_job.outputs.yarn_cache_dir }}
           key: ${{ needs.cache_dependencies_job.outputs.cache_key }}
+      - name: Install dependencies
+        run: yarn install
       - name: Test code
         run: yarn test
