@@ -14,7 +14,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
-          cache: yarn
       - name: Get yarn cache directiory path
         id: yarn_cache_dir_path
         run: echo "::set-output name=cache_dir::$(yarn cache dir)"
@@ -30,8 +29,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
       - name: Install dependencies
-        if: steps.cache_dependencies.outputs.cache-hit != 'true'
-        run: yarn install --frozen-lockfile
+#        if: steps.cache_dependencies.outputs.cache-hit != 'true'
+        run: yarn install --frozen-lockfile --prefer-offline
     outputs:
       yarn_cache_dir: ${{ steps.yarn_cache_dir_path.outputs.cache_dir }}
       cache_key: ${{ steps.yarn_lock_cache.outputs.hash }}
@@ -47,7 +46,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
-          cache: yarn
       - name: Check yarn cache
         uses: actions/cache@v3
         id: cache_dependencies
@@ -72,7 +70,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
-          cache: yarn
       - name: Check yarn cache
         uses: actions/cache@v3
         id: cache_dependencies
@@ -97,7 +94,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
-          cache: yarn
       - name: Check yarn cache
         uses: actions/cache@v3
         id: cache_dependencies
