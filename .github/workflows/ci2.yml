@@ -1,12 +1,9 @@
-name: CI
+name: CI2
 
 on:
   pull_request:
     # By default, a workflow only runs when a pull_request event's activity type is opened, synchronize, or reopened
     branches: [main]
-
-env:
-  NODE_MODULES_PATH: "**/node_modules"
 
 jobs:
   cache_dependencies_job:
@@ -17,24 +14,23 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
-          cache: yarn
       - name: Get yarn cache directiory path
         id: yarn_cache_dir_path
         run: echo "::set-output name=cache_dir::$(yarn cache dir)"
       - name: Create cache key
         id: yarn_lock_cache
-        run: echo "::set-output name=hash::yarn-${{ hashFiles('**/yarn.lock') }}"
-      - name: Cache node_modules
+        run: echo "::set-output name=hash::${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}"
+      - name: Cache yarn cache dir
         uses: actions/cache@v3
         id: cache_dependencies
         with:
-          path: ${{ env.NODE_MODULES_PATH }}
+          path: ${{ steps.yarn_cache_dir_path.outputs.cache_dir }}
           key: ${{ steps.yarn_lock_cache.outputs.hash }}
           restore-keys: |
-            yarn-
+            ${{ runner.os }}-yarn-
       - name: Install dependencies
-        if: steps.cache_dependencies.outputs.cache-hit == ''
-        run: yarn install --frozen-lockfile
+#        if: steps.cache_dependencies.outputs.cache-hit != 'true'
+        run: yarn install --frozen-lockfile --prefer-offline
     outputs:
       yarn_cache_dir: ${{ steps.yarn_cache_dir_path.outputs.cache_dir }}
       cache_key: ${{ steps.yarn_lock_cache.outputs.hash }}
@@ -50,13 +46,14 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
-          cache: yarn
-      - name: Check dependency cache
+      - name: Check yarn cache
         uses: actions/cache@v3
         id: cache_dependencies
         with:
-          path: ${{ env.NODE_MODULES_PATH }}
+          path: ${{ needs.cache_dependencies_job.outputs.yarn_cache_dir }}
           key: ${{ needs.cache_dependencies_job.outputs.cache_key }}
+      - name: Install dependencies
+        run: yarn --prefer-offline
       - name: Lint code
         run: yarn lint
 
@@ -73,13 +70,14 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
-          cache: yarn
-      - name: Check dependency cache
+      - name: Check yarn cache
         uses: actions/cache@v3
         id: cache_dependencies
         with:
-          path: ${{ env.NODE_MODULES_PATH }}
+          path: ${{ needs.cache_dependencies_job.outputs.yarn_cache_dir }}
           key: ${{ needs.cache_dependencies_job.outputs.cache_key }}
+      - name: Install dependencies
+        run: yarn --prefer-offline
       - name: Build code
         run: yarn build
 
@@ -96,12 +94,13 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
-          cache: yarn
-      - name: Check dependency cache
+      - name: Check yarn cache
         uses: actions/cache@v3
         id: cache_dependencies
         with:
-          path: ${{ env.NODE_MODULES_PATH }}
+          path: ${{ needs.cache_dependencies_job.outputs.yarn_cache_dir }}
           key: ${{ needs.cache_dependencies_job.outputs.cache_key }}
+      - name: Install dependencies
+        run: yarn --prefer-offline
       - name: Test code
         run: yarn test
