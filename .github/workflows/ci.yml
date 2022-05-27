@@ -5,6 +5,9 @@ on:
     # By default, a workflow only runs when a pull_request event's activity type is opened, synchronize, or reopened
     branches: [main]
 
+env:
+  NODE_MODULES_PATH: "**/node_modules"
+
 jobs:
   cache_dependencies_job:
     runs-on: ubuntu-latest
@@ -25,7 +28,9 @@ jobs:
         uses: actions/cache@v3
         id: cache_dependencies
         with:
-          path: ${{ steps.yarn_cache_dir_path.outputs.cache_dir }}
+          path: |
+            ${{ env.NODE_MODULES_PATH }}
+            ${{ steps.yarn_cache_dir_path.outputs.cache_dir }}
           key: ${{ steps.yarn_lock_cache.outputs.hash }}
           restore-keys: |
             yarn-
@@ -52,7 +57,9 @@ jobs:
         uses: actions/cache@v3
         id: cache_dependencies
         with:
-          path: ${{ needs.cache_dependencies_job.outputs.yarn_cache_dir }}
+          path: |
+            ${{ env.NODE_MODULES_PATH }}
+            ${{ needs.cache_dependencies_job.outputs.yarn_cache_dir }}
           key: ${{ needs.cache_dependencies_job.outputs.cache_key }}
       - name: Lint code
         run: yarn lint
@@ -75,7 +82,9 @@ jobs:
         uses: actions/cache@v3
         id: cache_dependencies
         with:
-          path: ${{ needs.cache_dependencies_job.outputs.yarn_cache_dir }}
+          path: |
+            ${{ env.NODE_MODULES_PATH }}
+            ${{ needs.cache_dependencies_job.outputs.yarn_cache_dir }}
           key: ${{ needs.cache_dependencies_job.outputs.cache_key }}
       - name: Build code
         run: yarn build
@@ -98,7 +107,9 @@ jobs:
         uses: actions/cache@v3
         id: cache_dependencies
         with:
-          path: ${{ needs.cache_dependencies_job.outputs.yarn_cache_dir }}
+          path: |
+            ${{ env.NODE_MODULES_PATH }}
+            ${{ needs.cache_dependencies_job.outputs.yarn_cache_dir }}
           key: ${{ needs.cache_dependencies_job.outputs.cache_key }}
       - name: Test code
         run: yarn test
