@@ -28,9 +28,7 @@ jobs:
         uses: actions/cache@v3
         id: cache_dependencies
         with:
-          path: |
-            ${{ env.NODE_MODULES_PATH }}
-            ${{ steps.yarn_cache_dir_path.outputs.cache_dir }}
+          path: ${{ env.NODE_MODULES_PATH }}
           key: ${{ steps.yarn_lock_cache.outputs.hash }}
           restore-keys: |
             yarn-
@@ -57,9 +55,7 @@ jobs:
         uses: actions/cache@v3
         id: cache_dependencies
         with:
-          path: |
-            ${{ env.NODE_MODULES_PATH }}
-            ${{ needs.cache_dependencies_job.outputs.yarn_cache_dir }}
+          path: ${{ env.NODE_MODULES_PATH }}
           key: ${{ needs.cache_dependencies_job.outputs.cache_key }}
       - name: Lint code
         run: yarn lint
@@ -82,9 +78,7 @@ jobs:
         uses: actions/cache@v3
         id: cache_dependencies
         with:
-          path: |
-            ${{ env.NODE_MODULES_PATH }}
-            ${{ needs.cache_dependencies_job.outputs.yarn_cache_dir }}
+          path: ${{ env.NODE_MODULES_PATH }}
           key: ${{ needs.cache_dependencies_job.outputs.cache_key }}
       - name: Build code
         run: yarn build
@@ -107,9 +101,7 @@ jobs:
         uses: actions/cache@v3
         id: cache_dependencies
         with:
-          path: |
-            ${{ env.NODE_MODULES_PATH }}
-            ${{ needs.cache_dependencies_job.outputs.yarn_cache_dir }}
+          path: ${{ env.NODE_MODULES_PATH }}
           key: ${{ needs.cache_dependencies_job.outputs.cache_key }}
       - name: Test code
         run: yarn test
