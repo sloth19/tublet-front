@@ -30,6 +30,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
       - name: Install dependencies
+        if: steps.cache_dependencies.outputs.cache-hit != 'true'
         run: yarn install --frozen-lockfile
     outputs:
       yarn_cache_dir: ${{ steps.yarn_cache_dir_path.outputs.cache_dir }}
@@ -54,7 +55,7 @@ jobs:
           path: ${{ needs.cache_dependencies_job.outputs.yarn_cache_dir }}
           key: ${{ needs.cache_dependencies_job.outputs.cache_key }}
       - name: Install dependencies
-        run: yarn install
+        run: yarn --prefer-offline
       - name: Lint code
         run: yarn lint
 
@@ -79,7 +80,7 @@ jobs:
           path: ${{ needs.cache_dependencies_job.outputs.yarn_cache_dir }}
           key: ${{ needs.cache_dependencies_job.outputs.cache_key }}
       - name: Install dependencies
-        run: yarn install
+        run: yarn --prefer-offline
       - name: Build code
         run: yarn build
 
@@ -104,6 +105,6 @@ jobs:
           path: ${{ needs.cache_dependencies_job.outputs.yarn_cache_dir }}
           key: ${{ needs.cache_dependencies_job.outputs.cache_key }}
       - name: Install dependencies
-        run: yarn install
+        run: yarn --prefer-offline
       - name: Test code
         run: yarn test
