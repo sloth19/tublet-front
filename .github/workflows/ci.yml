@@ -5,8 +5,6 @@ on:
     # By default, a workflow only runs when a pull_request event's activity type is opened, synchronize, or reopened
     branches: [main]
 
-env:
-  NODE_MODULES_PATH: "**/node_modules"
 jobs:
   cache_dependencies_job:
     runs-on: ubuntu-latest
@@ -17,20 +15,26 @@ jobs:
         with:
           node-version: 16.x
           cache: yarn
+      - name: Get yarn cache directiory path
+        id: yarn_cache_dir_path
+        run: echo "::set-output name=cache_dir::$(yarn cache dir)"
       - name: Create cache key
-        id: lockfile_hash_key
-        run: echo "::set-output name=hash::${{ hashFiles('**/yarn.lock') }}"
+        id: yarn_lock_cache
+        run: echo "::set-output name=hash::yarn-${{ hashFiles('**/yarn.lock') }}"
       - name: Cache node_modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache_dependencies
         with:
-          path: ${{ env.NODE_MODULES_PATH }}
-          key: ${{ steps.lockfile_hash_key.outputs.hash }}
+          path: ${{ steps.yarn_cache_dir_path.outputs.cache_dir }}
+          key: ${{ steps.yarn_lock_cache.outputs.hash }}
+          restore-keys: |
+            yarn-
       - name: Install dependencies
         if: steps.cache_dependencies.outputs.cache-hit == ''
         run: yarn install --frozen-lockfile
     outputs:
-      cache_key: ${{ steps.lockfile_hash_key.outputs.hash }}
+      yarn_cache_dir: ${{ steps.yarn_cache_dir_path.outputs.cache_dir }}
+      cache_key: ${{ steps.yarn_lock_cache.outputs.hash }}
 
   lint:
     runs-on: ubuntu-latest
@@ -45,14 +49,11 @@ jobs:
           node-version: 16.x
           cache: yarn
       - name: Check dependency cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache_dependencies
         with:
-          path: ${{ env.NODE_MODULES_PATH }}
+          path: ${{ needs.cache_dependencies_job.outputs.yarn_cache_dir }}
           key: ${{ needs.cache_dependencies_job.outputs.cache_key }}
-      - name: Install dependencies if not cache-hit
-        if: steps.cache_dependencies.outputs.cache-hit == ''
-        run: yarn install --frozen-lockfile
       - name: Lint code
         run: yarn lint
 
@@ -71,10 +72,10 @@ jobs:
           node-version: 16.x
           cache: yarn
       - name: Check dependency cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache_dependencies
         with:
-          path: ${{ env.NODE_MODULES_PATH }}
+          path: ${{ needs.cache_dependencies_job.outputs.yarn_cache_dir }}
           key: ${{ needs.cache_dependencies_job.outputs.cache_key }}
       - name: Build code
         run: yarn build
@@ -94,10 +95,10 @@ jobs:
           node-version: 16.x
           cache: yarn
       - name: Check dependency cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache_dependencies
         with:
-          path: ${{ env.NODE_MODULES_PATH }}
+          path: ${{ needs.cache_dependencies_job.outputs.yarn_cache_dir }}
           key: ${{ needs.cache_dependencies_job.outputs.cache_key }}
       - name: Test code
         run: yarn test
