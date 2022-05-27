@@ -17,13 +17,13 @@ jobs:
           cache: yarn
       - name: Create cache key
         id: lockfile_hash_key
-        run: echo "::set-output name=hash::${{ hashFiles('package-lock.json') }}"
+        run: echo "::set-output name=hash::${{ hashFiles('**/yarn.lock') }}"
       - name: Cache node_modules
         uses: actions/cache@v2
         id: cache_dependencies
         with:
           path: "**/node_modules"
-          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ steps.lockfile_hash_key.outputs.hash }}
       - name: Install dependencies
         if: steps.cache_dependencies.outputs.cache-hit == ''
         run: yarn install --frozen-lockfile
@@ -54,12 +54,10 @@ jobs:
       - name: Echo cache hit
         if: steps.cache_dependencies.outputs.cache-hit
         run: echo "HIT!"
-
 #      - name: Install dependencies
 #        run: yarn install --frozen-lockfile
 #      - name: Lint code
 #        run: yarn lint
-
 
 #  lint:
 #    runs-on: ubuntu-latest
