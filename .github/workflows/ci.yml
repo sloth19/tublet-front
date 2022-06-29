@@ -1,6 +1,12 @@
 name: CI
 
 on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deploy to the server."
+        type: "environment"
+        required: true
   pull_request:
     # By default, a workflow only runs when a pull_request event's activity type is opened, synchronize, or reopened
     branches: [main]
