@@ -1,0 +1,13 @@
+name: Web CD(development)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Set the environment to deploy"
+        type: "environment"
+        required: true
+
+jobs:
+  log:
+    run: echo ${{ inputs.environment }}
